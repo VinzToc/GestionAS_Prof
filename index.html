@@ -111,7 +111,9 @@
 
 <nav class="tabs"><button class="on" data-p="p-ins"><i>📝</i>Inscriptions<span class="nb" id="nbq" hidden></span></button><button data-p="p-car"><i>🪪</i>Cartes d'AS</button><button data-p="p-app"><i>✅</i>Appel</button><button data-p="p-don"><i>💾</i>Données</button></nav>
 
-<div id="scan"><video id="vid" playsinline muted></video><div class="flash" id="flash" hidden></div><div class="info"><span id="scanTx">Présentez le QR code…</span><button class="btn r" id="scanX">Fermer</button></div></div>
+<div id="scan"><div class="scanbox"><div class="scanhd"><b id="scanTx">Scanner</b><button class="btn r sm" id="scanX" type="button">✕ Fermer</button></div>
+<div class="scanview"><video id="vid" playsinline muted></video><i class="ret"></i><div class="flash" id="flash" hidden></div></div>
+<p class="hint">Placez le QR code dans le cadre, à 15-20 cm. Demandez à l'élève de monter la luminosité de son écran.</p></div></div>
 
 <dialog id="dPaste"><h3>Coller un code</h3><textarea id="pasteTx" rows="5" placeholder="Contenu du QR code…"></textarea><div class="row"><button class="btn" id="pasteOk">Valider</button><button class="btn r" id="pasteX">Annuler</button></div></dialog>
 

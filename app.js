@@ -38,25 +38,31 @@ async function recoit(it,silencieux){ // it={nom,prenom,classe,naissance,record,
  saveQ();render();if(!silencieux)toast('⚠ '+it.nom+' '+it.prenom+' : à rapprocher');return'queue'}
 async function traiteTexte(t){
  const ty=A.typeCode(t);
- if(ty==='inscription'){const d=A.decodeInscription(t);return recoit({nom:d.nom,prenom:d.prenom,classe:d.classe,naissance:d.record.Naissance,record:d.record})}
+ if(ty==='inscription'){const d=A.decodeInscription(t);const r=await recoit({nom:d.nom,prenom:d.prenom,classe:d.classe,naissance:d.record.Naissance,record:d.record});if(d.avertissement)setTimeout(()=>toast('⚠ '+d.avertissement),1200);return r}
  if(ty==='carte')throw new Error('Ceci est une carte d’adhérent : utilisez l’onglet Appel.');
  throw new Error('Code non reconnu.');
 }
 
 /* ---------- Scanner caméra ---------- */
-let stream=null,scanOn=false,lastTxt='',lastT=0;
+let stream=null,scanOn=false,lastTxt='',lastT=0,detector=null;
 async function scanner(onCode,titre){
- try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false})}catch(e){toast('Caméra indisponible : '+e.message);return}
+ if(scanOn)return;
+ try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}},audio:false})}catch(e){toast('Caméra indisponible : '+e.message);return}
+ try{const tr=stream.getVideoTracks()[0],cap=tr.getCapabilities?tr.getCapabilities():{};if(cap.focusMode&&cap.focusMode.includes('continuous'))await tr.applyConstraints({advanced:[{focusMode:'continuous'}]})}catch(e){}
  const v=$('vid');v.srcObject=stream;await v.play();$('scan').classList.add('on');$('scanTx').textContent=titre;scanOn=true;
+ try{detector=('BarcodeDetector' in window)?new BarcodeDetector({formats:['qr_code']}):null}catch(e){detector=null}
  const cv=document.createElement('canvas'),cx=cv.getContext('2d',{willReadFrequently:true});
+ const lire=async()=>{
+  if(detector){try{const r=await detector.detect(v);if(r&&r.length&&r[0].rawValue)return r[0].rawValue}catch(e){detector=null}}
+  const s=Math.min(1,1280/v.videoWidth);cv.width=Math.round(v.videoWidth*s);cv.height=Math.round(v.videoHeight*s);cx.drawImage(v,0,0,cv.width,cv.height);
+  const r=jsQR(cx.getImageData(0,0,cv.width,cv.height).data,cv.width,cv.height,{inversionAttempts:'attemptBoth'});return r&&r.data};
  const tick=async()=>{if(!scanOn)return;
-  if(v.videoWidth){const s=Math.min(1,720/v.videoWidth);cv.width=v.videoWidth*s;cv.height=v.videoHeight*s;cx.drawImage(v,0,0,cv.width,cv.height);
-   const r=jsQR(cx.getImageData(0,0,cv.width,cv.height).data,cv.width,cv.height,{inversionAttempts:'dontInvert'});
-   if(r&&r.data&&(r.data!==lastTxt||Date.now()-lastT>3000)){lastTxt=r.data;lastT=Date.now();
-    let msg='';try{msg=await onCode(r.data)||''}catch(e){msg='❌ '+e.message}
+  if(v.videoWidth){const txt=await lire();
+   if(scanOn&&txt&&(txt!==lastTxt||Date.now()-lastT>3000)){lastTxt=txt;lastT=Date.now();
+    let msg='';try{msg=await onCode(txt)||''}catch(e){msg='❌ '+e.message}
     if(msg){const f=$('flash');f.textContent=msg;f.hidden=false;clearTimeout(f._t);f._t=setTimeout(()=>f.hidden=true,2200)}}}
-  requestAnimationFrame(tick)};tick()}
-function fermeScan(){if(!scanOn&&!stream)return;scanOn=false;if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}$('scan').classList.remove('on')}
+  if(scanOn)setTimeout(tick,detector?80:140)};tick()}
+function fermeScan(){if(!scanOn&&!stream)return;scanOn=false;if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}$('vid').srcObject=null;$('scan').classList.remove('on')}
 $('scanX').onclick=fermeScan;document.addEventListener('visibilitychange',()=>{if(document.hidden)fermeScan()});window.addEventListener('pagehide',fermeScan);
 
 $('bScan').onclick=()=>scanner(async t=>{const r=await traiteTexte(t);setTimeout(fermeScan,900);return r==='ok'?'✅ Inscription enregistrée':'⚠ À rapprocher'},'Scannez le QR « Mon AS » de l’élève');
