@@ -25,10 +25,10 @@
     <div class="row" style="margin-top:0">
       <button class="btn" id="bScan">📷 Scanner un QR</button>
       <button class="btn b" id="bPaste">Coller un code</button>
-      <button class="btn r" id="bFile">Importer un fichier</button>
-      <input type="file" id="fileIn" accept=".xlsx,.csv,.txt" multiple hidden>
+      <button class="btn r" id="bFile">Importer un ancien fichier (CSV)</button>
+      <input type="file" id="fileIn" accept=".csv,.txt" multiple hidden>
     </div>
-    <p class="hint">QR code ou fichier .xlsx remis par l'élève (« Mon AS »), ancien CSV ENT ou sauvegarde Pronote. Le nom saisi par l'élève est rapproché de la liste du portail.</p>
+    <p class="hint">QR code « Mon AS » présenté par l'élève, ou ancien fichier CSV de l'ENT / sauvegarde Pronote. Le nom saisi par l'élève est rapproché de la liste du portail.</p>
     <div id="queue"></div>
   </div>
   <div class="card"><h2>👥 Élèves</h2>
@@ -68,6 +68,20 @@
 
 <!-- ===== DONNEES ===== -->
 <section class="pane" id="p-don">
+  <div class="card"><h2>💳 Cotisation en ligne</h2>
+    <p class="hint" style="margin-top:0">Collez le lien de paiement (campagne HelloAsso, par exemple). Le bouton « Payer ma cotisation en ligne » apparaîtra dans Mon AS une fois l'inscription enregistrée par l'élève.</p>
+    <div class="g2"><div class="f"><label for="cUrl">Lien de paiement (https://…)</label><input type="url" id="cUrl" inputmode="url" placeholder="https://www.helloasso.com/…"></div>
+    <div class="f"><label for="cMont">Montant affiché (facultatif)</label><input type="text" id="cMont" placeholder="ex : 10 €" maxlength="30"></div></div>
+    <div class="row" style="margin-top:0"><button class="btn" id="cSave">Enregistrer</button><a class="btn r" id="cTest" href="#" target="_blank" rel="noopener noreferrer" hidden>Tester le lien</a></div>
+    <p class="hint" id="cMsg"></p>
+    <div id="cDiff" hidden>
+      <h2 style="margin-top:16px">Faire connaître le lien aux élèves</h2>
+      <p class="hint" style="margin-top:0">Les élèves n'ont pas accès à cet appareil : le lien doit leur parvenir une fois. <b>Option 1</b> : envoyez-leur ce lien Mon AS (ENT, Pronote, QR code) ; il enregistre le lien de paiement sur leur téléphone à l'ouverture. <b>Option 2</b> : déposez le fichier config.json dans le dépôt Mon_AS_Eleves : tous les élèves le reçoivent automatiquement.</p>
+      <div class="f"><label for="cLien">Lien Mon AS à donner aux élèves</label><input type="text" id="cLien" readonly></div>
+      <div class="row" style="margin-top:0"><button class="btn b sm" id="cCopy">Copier le lien</button><button class="btn r sm" id="cQrBtn">Afficher en QR code</button><button class="btn r sm" id="cCfg">Télécharger config.json</button></div>
+      <div class="qrbox" id="cQrBox" hidden style="margin-top:12px"><canvas id="cQr"></canvas></div>
+    </div>
+  </div>
   <div class="card"><h2>📤 Exports</h2>
     <div class="row" style="margin-top:0">
       <button class="btn" id="xAS">Classeur AS (.xlsx)</button>
