@@ -18,7 +18,7 @@ const nomc=e=>e.nom+' '+A.tc(e.prenom);
 async function load(){L=(await EPS.all()).sort(byName);render()}
 
 /* ---------- Onglets ---------- */
-document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id===b.dataset.p));render()});
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{fermeScan();document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id===b.dataset.p));render()});
 
 /* ---------- Application d'une inscription à un élève ---------- */
 async function applique(e,rec,pres,extra){
@@ -53,10 +53,10 @@ async function scanner(onCode,titre){
     let msg='';try{msg=await onCode(r.data)||''}catch(e){msg='❌ '+e.message}
     if(msg){const f=$('flash');f.textContent=msg;f.hidden=false;clearTimeout(f._t);f._t=setTimeout(()=>f.hidden=true,2200)}}}
   requestAnimationFrame(tick)};tick()}
-function fermeScan(){scanOn=false;if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}$('scan').classList.remove('on')}
-$('scanX').onclick=fermeScan;
+function fermeScan(){if(!scanOn&&!stream)return;scanOn=false;if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}$('scan').classList.remove('on')}
+$('scanX').onclick=fermeScan;document.addEventListener('visibilitychange',()=>{if(document.hidden)fermeScan()});window.addEventListener('pagehide',fermeScan);
 
-$('bScan').onclick=()=>scanner(async t=>{const r=await traiteTexte(t);return r==='ok'?'✅ Inscription enregistrée':'⚠ À rapprocher'},'Scannez le QR « Mon AS » de l’élève');
+$('bScan').onclick=()=>scanner(async t=>{const r=await traiteTexte(t);setTimeout(fermeScan,900);return r==='ok'?'✅ Inscription enregistrée':'⚠ À rapprocher'},'Scannez le QR « Mon AS » de l’élève');
 $('bPaste').onclick=()=>{$('pasteTx').value='';$('dPaste').showModal()};$('pasteX').onclick=()=>$('dPaste').close();
 $('pasteOk').onclick=async()=>{try{await traiteTexte($('pasteTx').value);$('dPaste').close()}catch(e){toast(e.message)}};
 
@@ -98,7 +98,7 @@ function fillSel(sel,all){const v=sel.value,c=classes();sel.innerHTML='<option v
 function pills(e){const g=G(e),p=[];
  p.push(`<span class="pill ${g.Cotisation==='Oui'?'ok':'ko'}">${g.Cotisation==='Oui'?'cotisation ✓':'cotisation ✗'}</span>`);
  p.push(`<span class="pill ${licence(e)?'ok':'or'}">${licence(e)?'licence '+esc(licence(e)):'licence ?'}</span>`);
- p.push(`<span class="pill ${g.Dossier_papier==='Oui'?'ok':'or'}">${g.Dossier_papier==='Oui'?'papier ✓':'papier ?'}</span>`);
+ p.push(`<span class="pill ${g.Dossier_papier==='Oui'?'ok':'or'}">${g.Dossier_papier==='Oui'?'fiche ✓':'fiche ?'}</span>`);
  const n=PL(e).length;if(n)p.push(`<span class="pill">${n} présence${n>1?'s':''}</span>`);return p.join('')}
 function renderList(){
  $('vide').hidden=!!L.length;
@@ -107,11 +107,11 @@ function renderList(){
  if(q)l=l.filter(e=>A.norm(e.nom+e.prenom+e.classe).includes(q));
  else l=l.filter(e=>st==='all'?true:st==='ins'?inscrit(e):inscrit(e)&&(st==='coti'?G(e).Cotisation!=='Oui':st==='lic'?!licence(e):G(e).Dossier_papier!=='Oui'));
  $('cnt').textContent=l.length+' élève'+(l.length>1?'s':'')+(q?' (recherche dans toute la liste)':'');
- $('lst').innerHTML=l.slice(0,300).map(e=>`<li><div class="cl" data-id="${esc(e.id)}"><div class="nm">${esc(e.nom)} ${esc(A.tc(e.prenom))} <span class="sb">· ${esc(e.classe)}</span></div><div>${inscrit(e)?pills(e):'<span class="pill">non inscrit</span>'}</div></div></li>`).join('')}
+ $('lst').innerHTML=l.slice(0,300).map(e=>`<li><div class="cl"><span class="nm">${esc(e.nom)} ${esc(A.tc(e.prenom))}</span> <span class="sb">· ${esc(e.classe)}</span> <span class="pls">${inscrit(e)?pills(e):'<span class="pill">non inscrit</span>'}</span></div><button class="btn b sm" data-id="${esc(e.id)}">Fiche</button></li>`).join('')}
 ['q','fcl','fst'].forEach(i=>$(i).addEventListener('input',renderList));
-$('lst').onclick=ev=>{const c=ev.target.closest('[data-id]');if(c)fiche(c.dataset.id)};
+$('lst').onclick=ev=>{const c=ev.target.closest('button[data-id]');if(c)fiche(c.dataset.id)};
 function renderKpis(){const I=L.filter(inscrit);
- $('kpis').innerHTML=[[I.length,'Inscrits'],[I.filter(e=>G(e).Cotisation!=='Oui').length,'Cotisation due'],[I.filter(e=>!licence(e)).length,'Sans licence'],[I.filter(e=>G(e).Dossier_papier!=='Oui').length,'Sans papier']].map(([n,t])=>`<div class="kpi"><b>${n}</b><span>${t}</span></div>`).join('')}
+ $('kpis').innerHTML=[[I.length,'Inscrits'],[I.filter(e=>G(e).Cotisation!=='Oui').length,'Cotisation due'],[I.filter(e=>!licence(e)).length,'Sans licence'],[I.filter(e=>G(e).Dossier_papier!=='Oui').length,'Sans fiche']].map(([n,t])=>`<div class="kpi"><b>${n}</b><span>${t}</span></div>`).join('')}
 
 /* ---------- Fiche élève ---------- */
 let curId=null;

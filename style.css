@@ -55,11 +55,12 @@ dialog h3{margin:0 0 10px}dialog ul{padding-left:0;list-style:none;margin:0 0 14
 dialog li button{width:100%;text-align:left;border:1px solid var(--bd);background:rgba(255,255,255,.07);color:var(--tx);border-radius:10px;padding:9px 12px;font:inherit;cursor:pointer}
 .foot{max-width:760px;margin:18px auto 0;padding:14px 16px;text-align:center;font-size:.8rem;color:var(--mut)}.foot a{color:var(--bl1);font-weight:700}
 /* ---- Gestion AS (professeur) ---- */
-body{padding-bottom:84px}
-.tabs{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;background:rgba(10,16,34,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom)}
-.tabs button{flex:1;border:0;background:none;color:var(--mut);font:inherit;font-weight:800;font-size:.78rem;padding:12px 4px;cursor:pointer;letter-spacing:.03em}
-.tabs button.on{color:var(--or1);box-shadow:inset 0 3px 0 var(--or1)}
-.tabs .nb{display:inline-block;min-width:18px;padding:0 5px;margin-left:4px;border-radius:9px;background:var(--ko);color:#14151a;font-size:.7rem}
+body{padding-bottom:104px}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;gap:6px;padding:8px 8px calc(8px + env(safe-area-inset-bottom));background:linear-gradient(180deg,#16204a,#0d1434);border-top:2px solid var(--or1);box-shadow:0 -8px 24px #000a}
+.tabs button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;border:1.5px solid var(--bd);border-radius:14px;background:rgba(255,255,255,.07);color:var(--tx);font:inherit;font-weight:800;font-size:.8rem;padding:8px 2px 7px;cursor:pointer;letter-spacing:.02em;position:relative}
+.tabs button i{font-style:normal;font-size:1.3rem;line-height:1}
+.tabs button.on{background:linear-gradient(135deg,var(--or1),var(--or2));color:#14151a;border-color:transparent;box-shadow:0 4px 14px #ff6a0066}
+.tabs .nb{position:absolute;top:2px;right:6px;display:inline-block;min-width:18px;padding:0 5px;margin:0;border-radius:9px;background:var(--ko);color:#14151a;font-size:.7rem;font-weight:900}
 .pane{display:none}.pane.on{display:block}
 .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0}.kpi{text-align:center;padding:10px 4px;border-radius:12px;background:rgba(0,0,0,.3);border:1px solid var(--bd)}.kpi b{display:block;font-size:1.5rem;color:var(--or1)}.kpi span{font-size:.68rem;color:var(--mut);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
 .filters{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}.filters input,.filters select{flex:1;min-width:130px}
@@ -81,3 +82,6 @@ dialog.big{max-width:560px}.kv{display:grid;grid-template-columns:auto 1fr;gap:3
 .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);z-index:120;padding:10px 18px;border-radius:12px;background:#101a36;border:1px solid var(--bd);font-weight:700;max-width:92%;text-align:center}
 @media(max-width:480px){.kpis{grid-template-columns:repeat(2,1fr)}}
 input[type=search]{-webkit-appearance:none;appearance:none}
+.cl .pls{margin-left:2px}
+.lst li .btn{flex:none}
+.toast{bottom:112px}

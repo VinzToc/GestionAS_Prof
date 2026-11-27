@@ -34,7 +34,7 @@
   <div class="card"><h2>👥 Élèves</h2>
     <div class="filters"><input type="search" id="q" placeholder="Rechercher (dans toute la liste)…">
       <select id="fcl"></select>
-      <select id="fst"><option value="ins">Inscrits</option><option value="all">Tous les élèves</option><option value="coti">Cotisation à régler</option><option value="lic">Licence manquante</option><option value="pap">Dossier papier manquant</option></select></div>
+      <select id="fst"><option value="ins">Inscrits</option><option value="all">Tous les élèves</option><option value="coti">Cotisation à régler</option><option value="lic">Licence manquante</option><option value="pap">Fiche signée manquante</option></select></div>
     <p class="hint" id="cnt"></p>
     <ul class="lst scrl" id="lst"></ul>
     <div id="vide" class="hint" hidden>Aucun élève dans le portail. Importez d'abord le fichier Pronote dans l'onglet « Données ».</div>
@@ -85,7 +85,7 @@
 </section>
 </main>
 
-<nav class="tabs"><button class="on" data-p="p-ins">Inscriptions<span class="nb" id="nbq" hidden></span></button><button data-p="p-car">Cartes</button><button data-p="p-app">Appel</button><button data-p="p-don">Données</button></nav>
+<nav class="tabs"><button class="on" data-p="p-ins"><i>📝</i>Inscriptions<span class="nb" id="nbq" hidden></span></button><button data-p="p-car"><i>🪪</i>Cartes d'AS</button><button data-p="p-app"><i>✅</i>Appel</button><button data-p="p-don"><i>💾</i>Données</button></nav>
 
 <div id="scan"><video id="vid" playsinline muted></video><div class="flash" id="flash" hidden></div><div class="info"><span id="scanTx">Présentez le QR code…</span><button class="btn r" id="scanX">Fermer</button></div></div>
 
@@ -94,7 +94,7 @@
 <dialog id="dFiche" class="big fiche"><h3 id="fTitre"></h3><div id="fInfo"></div>
   <label class="ck" style="margin-top:10px"><input type="checkbox" id="fIns"><span>Inscrit à l'AS</span></label>
   <label class="ck" style="margin-top:8px"><input type="checkbox" id="fCoti"><span>Cotisation réglée</span></label>
-  <label class="ck" style="margin-top:8px"><input type="checkbox" id="fPap"><span>Dossier papier signé reçu</span></label>
+  <label class="ck" style="margin-top:8px"><input type="checkbox" id="fPap"><span>Fiche signée reçue</span></label>
   <div class="g2"><div><label class="lb2" for="fLic">N° de licence UNSS</label><input type="text" id="fLic"></div><div><label class="lb2" for="fJo">N° de jeune officiel</label><input type="text" id="fJo"></div></div>
   <label class="lb2" for="fNotes">Notes</label><textarea id="fNotes" rows="2"></textarea>
   <div class="row"><button class="btn" id="fOk">Enregistrer</button><button class="btn r" id="fX">Fermer</button><button class="btn r sm" id="fDel">Retirer de l'AS</button></div></dialog>
