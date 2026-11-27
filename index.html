@@ -1,98 +1,111 @@
-<!DOCTYPE html>
-<html lang="fr"><head><meta charset="utf-8">
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Gestion AS Pronote</title>
-<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#008277">
-<link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-maskable-192.png">
-<script src="version.js"></script>
-<script>addEventListener("beforeinstallprompt",function(e){e.preventDefault();window.dip=e;dispatchEvent(new Event("dipready"))})</script>
-<link rel="stylesheet" href="style.css?v=5">
-<style id="titre-moderne">/* Titre en casse mixte + logo mis en valeur, aux couleurs du logo */
-header h1{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif!important;font-style:italic!important;font-weight:900!important;text-transform:none!important;letter-spacing:.005em!important;line-height:1.08;background:none!important;-webkit-text-stroke:0!important;color:#fff!important;-webkit-text-fill-color:#fff!important;text-shadow:0 2px 0 #06463d,0 4px 12px rgba(0,0,0,.45)!important}
-header h1 .tm{background:linear-gradient(180deg,#ffd04a,#fb991a 72%)!important;-webkit-background-clip:text!important;background-clip:text!important;color:#fb991a!important;-webkit-text-fill-color:transparent!important;text-shadow:none!important;filter:drop-shadow(0 2px 0 #06463d)}
-header h1 small,header h1 em{font-style:normal!important;text-shadow:none!important;-webkit-text-fill-color:currentColor!important}
-header .lg{border-radius:50%!important;box-shadow:0 0 0 3px #fb991a,0 0 22px rgba(251,153,26,.55),0 6px 16px rgba(0,0,0,.4)!important;transition:transform .3s}
-header .lg:hover{transform:rotate(-5deg) scale(1.05)}
-header h1 small{font-weight:500}</style>
-</head><body>
-<header><div class="hd"><span class="lg"><img src="logo-transparent.png" alt="" onerror="this.onerror=function(){this.style.display='none'};this.src='logo.png'"></span><h1>Gestion <span class="tm">AS</span><small>Association Sportive · version Pronote</small></h1><span id="count"></span></div></header>
-<nav aria-label="Sections">
-<button data-t="t1" class="on">Import / Export</button>
-<button data-t="t2">Cartes d’AS</button>
-<button data-t="t3">Appel AS</button></nav>
+<title>Gestion AS – Association Sportive</title>
+<meta name="theme-color" content="#0b0f2e">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="hd">
+  <img class="logo" src="img/logo-app.png" alt="Logo de l'Association Sportive">
+  <div><h1 class="titre"><span class="t1">Gestion</span> <span class="t2">AS</span></h1>
+  <p class="sous">Espace professeur · <span id="saison"></span></p></div>
+</header>
 <main>
-<section id="t1">
-<div class="hero wide"><img class="main" src="logo.png" alt="Logo de l’Association Sportive" onerror="this.style.display='none'"><img class="pn" src="logo_pronote.png" alt="Pronote" onerror="this.style.display='none'"></div>
-<div class="panel wide" id="inst" hidden><h2>Installer l’application</h2><p id="instp"></p><button id="instb" hidden>Installer sur cet appareil</button></div>
-<div class="panel"><h2>Importer une classe Pronote ou une sauvegarde.</h2>
-<p>Fichier .csv issu de l’export d’une classe dans Pronote (attention à la structure du fichier !). Importez les classes une à une : la liste de l’établissement est complétée à chaque import et les profils déjà renseignés sont conservés. Une sauvegarde peut aussi être réimportée.</p>
-<input type="file" id="file" accept=".csv,text/csv"></div>
-<div class="panel"><h2>Enregistrer</h2>
-<p>Génère un .csv complet incluant les fiches élèves, la gestion des présences par séance et le total.</p>
-<button class="exp">Sauvegarde</button></div>
-<p id="m1" class="msg wide"></p>
-<div class="panel wide"><h2>Élèves de l’établissement <span id="nl"></span></h2>
-<input id="q" type="search" placeholder="Rechercher un nom ou une classe" aria-label="Rechercher dans la liste">
-<div class="filters g2"><label>Membre de l’AS<select id="gm"><option value="">Tous</option><option value="1">Membres de l’AS</option><option value="0">Non membres</option></select></label>
-<label>Autorisation parentale<select id="ga"><option value="">Toutes</option><option value="1">Validée</option><option value="0">Non validée</option></select></label>
-<label>Compétitions UNSS<select id="gc"><option value="">Toutes</option><option value="1">Participe</option><option value="0">Ne participe pas</option></select></label>
-<label>Activité<select id="gt"></select></label></div>
-<table id="tl"></table></div>
-<div class="panel wide"><h2>Confidentialité</h2>
-<p>Aucune donnée n’est envoyée sur Internet : tout reste dans la mémoire de ce navigateur. Sauvegardez régulièrement et effacez les données en fin d’année (RGPD).</p>
-<button id="wipe" class="danger">Effacer toutes les données</button></div>
+
+<!-- ===== INSCRIPTIONS ===== -->
+<section class="pane on" id="p-ins">
+  <div class="card"><div class="kpis" id="kpis"></div></div>
+  <div class="card"><h2>📥 Recevoir une inscription</h2>
+    <div class="row" style="margin-top:0">
+      <button class="btn" id="bScan">📷 Scanner un QR</button>
+      <button class="btn b" id="bPaste">Coller un code</button>
+      <button class="btn r" id="bFile">Importer un fichier</button>
+      <input type="file" id="fileIn" accept=".xlsx,.csv,.txt" multiple hidden>
+    </div>
+    <p class="hint">QR code ou fichier .xlsx remis par l'élève (« Mon AS »), ancien CSV ENT ou sauvegarde Pronote. Le nom saisi par l'élève est rapproché de la liste du portail.</p>
+    <div id="queue"></div>
+  </div>
+  <div class="card"><h2>👥 Élèves</h2>
+    <div class="filters"><input type="search" id="q" placeholder="Rechercher (dans toute la liste)…">
+      <select id="fcl"></select>
+      <select id="fst"><option value="ins">Inscrits</option><option value="all">Tous les élèves</option><option value="coti">Cotisation à régler</option><option value="lic">Licence manquante</option><option value="pap">Dossier papier manquant</option></select></div>
+    <p class="hint" id="cnt"></p>
+    <ul class="lst scrl" id="lst"></ul>
+    <div id="vide" class="hint" hidden>Aucun élève dans le portail. Importez d'abord le fichier Pronote dans l'onglet « Données ».</div>
+  </div>
 </section>
-<section id="t2" hidden>
-<div class="panel"><h2>Toutes les cartes</h2>
-<button id="gen">Générer les cartes</button>
-<button id="pdf" class="alt" disabled>Télécharger toutes les cartes (PDF)</button></div>
-<div class="panel"><h2>Une seule carte</h2>
-<div class="row"><input id="nm" list="dl" placeholder="Nom de l’élève"><button id="one">Télécharger</button></div></div>
-<p id="m2" class="msg wide"></p>
-<div id="cards" class="wide"></div>
+
+<!-- ===== CARTES ===== -->
+<section class="pane" id="p-car">
+  <div class="card"><h2>🪪 Cartes d'AS</h2>
+    <p class="hint">Cartes de format carte bancaire, générées à partir de la liste du portail (nom, classe, licence). 10 par page A4.</p>
+    <div class="filters"><select id="ccl"></select><label class="ck" style="flex:none"><input type="checkbox" id="cAll"><span>Tout cocher</span></label></div>
+    <ul class="lst scrl" id="clst"></ul>
+    <div class="row"><button class="btn" id="cPdf">PDF des cartes cochées</button><button class="btn b" id="cPng">Aperçu de la 1re carte</button></div>
+    <canvas id="cprev" class="cardcv" hidden></canvas>
+  </div>
 </section>
-<section id="t3" hidden>
-<div class="panel"><h2>Séance</h2>
-<div class="row"><input type="date" id="date" aria-label="Date de la séance"><button id="scan">Lancer le scan</button><button id="stop" class="alt" hidden>Fin du scan</button></div>
-<div class="row man"><select id="act" aria-label="Activité de la séance"></select></div>
-<div id="cam" hidden><video id="v" playsinline muted></video></div>
-<p id="m3" class="msg"></p>
-<div class="row man"><input id="man" list="dl" placeholder="Ajout manuel (nom)"><button id="add" class="alt">Ajouter</button></div></div>
-<div class="panel"><h2>Elèves présents aujourd'hui <span id="np"></span></h2><ul id="pl"></ul>
-<p>!! Pensez à sauvegarder les données !!</p>
-<button class="exp alt">Enregistrer</button></div>
-<div class="panel"><h2>Consulter les présences <span id="vn"></span></h2>
-<div class="filters"><label>Date de séance<select id="fd"></select></label>
-<label>Activité<select id="fa"></select></label>
-<label>Jour de la semaine<select id="fj"><option value="">Tous</option><option value="1">Lundi</option><option value="2">Mardi</option><option value="3">Mercredi</option><option value="4">Jeudi</option><option value="5">Vendredi</option><option value="6">Samedi</option><option value="0">Dimanche</option></select></label>
-<label>Sexe<select id="fs"><option value="">Tous</option><option value="Filles">Filles</option><option value="Garçons">Garçons</option></select></label></div>
-<p id="vh"></p><ul id="vl"></ul></div>
-<div class="panel stats"><h2>Statistiques des présences</h2><div id="st"></div></div>
+
+<!-- ===== APPEL ===== -->
+<section class="pane" id="p-app">
+  <div class="card"><h2>✅ Faire l'appel</h2>
+    <div class="g2"><div class="f"><label for="aDate">Date</label><input type="date" id="aDate"></div>
+      <div class="f"><label for="aAct">Activité</label><input type="text" id="aAct" list="aActs" placeholder="ex : Badminton"><datalist id="aActs"></datalist></div></div>
+    <div class="row" style="margin-top:0"><button class="btn" id="aScan">📷 Scanner les cartes</button></div>
+    <div class="f"><label for="aQ">Ajout manuel</label><input type="search" id="aQ" placeholder="Taper un nom…"></div>
+    <ul class="lst" id="aRes"></ul>
+    <h2 style="margin-top:16px">Présents <span id="aN"></span></h2>
+    <ul class="lst scrl" id="aPres"></ul>
+  </div>
+  <div class="card"><h2>📊 Statistiques</h2><div id="stats"></div></div>
 </section>
-<footer class="foot">
-<div><a href="confidentialite.html">Politique de confidentialité</a></div>
-<div><a class="ic" href="contact.html" aria-label="Contact" title="Contact"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 7 8.5 6 8.5-6"/></svg></a><a class="ic" href="http://vinzneuron.free.fr/" target="_blank" rel="noopener noreferrer" aria-label="Site web" title="Site web"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3.2 3 3.2 15 0 18M12 3c-3.2 3-3.2 15 0 18"/></svg></a><a class="ic" href="https://www.instagram.com/vinzneuron/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1" fill="currentColor" stroke="none"/></svg></a><a class="ic" href="https://www.youtube.com/@vinz_neuron" target="_blank" rel="noopener noreferrer" aria-label="YouTube" title="YouTube"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="2" y="5" width="20" height="14" rx="4.5"/><path d="M10 9.2v5.6l5-2.8z" fill="currentColor"/></svg></a></div>
-<p>Gestion AS · Vincent TOCQUIN – « VinZ Neuron »</p>
-</footer>
-<p class="ver">Version Pronote 5 · données stockées uniquement sur cet appareil</p>
+
+<!-- ===== DONNEES ===== -->
+<section class="pane" id="p-don">
+  <div class="card"><h2>📤 Exports</h2>
+    <div class="row" style="margin-top:0">
+      <button class="btn" id="xAS">Classeur AS (.xlsx)</button>
+      <button class="btn b" id="xAll">Classeur global portail (.xlsx)</button>
+      <button class="btn r" id="xOpuss">Liste des inscrits (OPUSS, .csv)</button>
+    </div>
+    <p class="hint">Le classeur AS contient les feuilles « inscription_as », « gestion_as » et « gestion_as_presences ». Il peut être réimporté dans le portail Mes Apps EPS.</p></div>
+  <div class="card"><h2>📂 Imports</h2>
+    <div class="row" style="margin-top:0"><button class="btn" id="iEleves">Liste élèves (CSV Pronote ou xlsx portail)</button><input type="file" id="fEleves" accept=".csv,.xlsx" hidden></div>
+    <p class="hint" id="meta"></p></div>
+  <div class="card"><h2>🧹 Nettoyage</h2>
+    <div class="row" style="margin-top:0"><button class="btn r" id="clearAS">Effacer toutes les données AS</button></div>
+    <p class="hint">Efface inscriptions, suivi et présences de tous les élèves (la liste Pronote est conservée). À faire en début de saison après export.</p></div>
+  <p class="foot">Données conservées uniquement sur cet appareil · <span id="ver"></span></p>
+</section>
 </main>
-<dialog id="fiche"><form method="dialog">
-<h2 id="fh"></h2><p id="fi"></p>
-<div class="two"><label class="fld">Sexe<input type="text" id="fsexe" readonly title="Donnée Pronote, non modifiable"></label><label class="fld">Classe<input type="text" id="fcls" autocomplete="off"><small id="fclsn"></small></label></div>
-<label class="fld">Régime<input type="text" id="freg" readonly title="Donnée Pronote, non modifiable"></label>
-<label class="chk"><input type="checkbox" id="fins" autofocus> Inscrit à l’AS et licencié UNSS</label>
-<label class="fld">N° de licence UNSS<input type="text" id="flic" autocomplete="off" placeholder="Numéro de la licence officielle"></label>
-<div class="fld">Activités pratiquées<details class="ms" id="facd"><summary id="fsum"></summary><div class="opts" id="fac"></div></details></div>
-<label class="chk"><input type="checkbox" id="fcomp"> Participe aux compétitions UNSS</label>
-<label class="chk"><input type="checkbox" id="fhandi"> Sport partagé / Handisport</label>
-<label class="chk"><input type="checkbox" id="fautor"> Autorisation parentale validée</label>
-<div class="fbtn"><button id="fcancel" class="alt" type="button">Annuler</button><button id="fsave">Enregistrer la fiche</button></div>
-</form></dialog>
-<datalist id="dl"></datalist>
+
+<nav class="tabs"><button class="on" data-p="p-ins">Inscriptions<span class="nb" id="nbq" hidden></span></button><button data-p="p-car">Cartes</button><button data-p="p-app">Appel</button><button data-p="p-don">Données</button></nav>
+
+<div id="scan"><video id="vid" playsinline muted></video><div class="flash" id="flash" hidden></div><div class="info"><span id="scanTx">Présentez le QR code…</span><button class="btn r" id="scanX">Fermer</button></div></div>
+
+<dialog id="dPaste"><h3>Coller un code</h3><textarea id="pasteTx" rows="5" placeholder="Contenu du QR code…"></textarea><div class="row"><button class="btn" id="pasteOk">Valider</button><button class="btn r" id="pasteX">Annuler</button></div></dialog>
+
+<dialog id="dFiche" class="big fiche"><h3 id="fTitre"></h3><div id="fInfo"></div>
+  <label class="ck" style="margin-top:10px"><input type="checkbox" id="fIns"><span>Inscrit à l'AS</span></label>
+  <label class="ck" style="margin-top:8px"><input type="checkbox" id="fCoti"><span>Cotisation réglée</span></label>
+  <label class="ck" style="margin-top:8px"><input type="checkbox" id="fPap"><span>Dossier papier signé reçu</span></label>
+  <div class="g2"><div><label class="lb2" for="fLic">N° de licence UNSS</label><input type="text" id="fLic"></div><div><label class="lb2" for="fJo">N° de jeune officiel</label><input type="text" id="fJo"></div></div>
+  <label class="lb2" for="fNotes">Notes</label><textarea id="fNotes" rows="2"></textarea>
+  <div class="row"><button class="btn" id="fOk">Enregistrer</button><button class="btn r" id="fX">Fermer</button><button class="btn r sm" id="fDel">Retirer de l'AS</button></div></dialog>
+
 <script src="lib/qrcode-generator-1.4.4.js"></script>
 <script src="lib/jsQR-1.4.0.js"></script>
 <script src="lib/jspdf-2.5.1.umd.min.js"></script>
-<script src="app.js?v=5"></script>
-<script src="nouveautes.js" defer></script>
-<script src="footer.js" data-pdc="prof" defer></script>
-</body></html>
+<script src="eps-core.js"></script>
+<script src="as-core.js"></script>
+<script src="legacy.js"></script>
+<script src="version.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
