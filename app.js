@@ -4,8 +4,11 @@
 const A=window.ASCORE,$=id=>document.getElementById(id),esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const INS=A.ACT_ID,GES='gestion_as',PRE='gestion_as_presences',QK='gestion_as_file_v1';
 let L=[],logo=null,queue=[];
-$('saison').textContent='Saison '+A.SAISON;$('ver').textContent='v'+(window.VERSION||'');
-const im=new Image();im.onload=()=>{logo=im};im.src='img/logo-as.png';
+const CFG='gestion_as_cfg_v1',LOGO_NOMS={defaut:'Logo Mon AS (par défaut)',rolland:'AS du lycée Romain Rolland (Amiens)'};
+const cfgLire=()=>{try{return A.cfgClean(JSON.parse(localStorage.getItem(CFG)||'null'))}catch(e){return{}}};
+function cfgAppliquer(){A.setConfig(cfgLire());$('saison').textContent=['Saison '+A.SAISON,A.ETAB].filter(Boolean).join(' · ');
+ const i=new Image();i.onload=()=>{logo=i};i.src=A.LOGOS[A.LOGO]||A.LOGOS.defaut;const d=$('aActs');if(d)d.innerHTML=A.ACT_AS.map(x=>`<option value="${esc(x)}">`).join('')}
+cfgAppliquer();$('ver').textContent='v'+(window.VERSION||'');
 try{queue=JSON.parse(localStorage.getItem(QK)||'[]')}catch(e){queue=[]}
 const saveQ=()=>{try{localStorage.setItem(QK,JSON.stringify(queue))}catch(e){}};
 function toast(t){const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),3200)}
@@ -173,23 +176,34 @@ function renderStats(){
 const CK='gestion_as_cotis_v1',MON_AS_URL='https://vinztoc.github.io/Mon_AS_Eleves/';
 const cotisOk=u=>/^https:\/\/[^\s]+$/i.test(u);
 const cotis=()=>{try{return JSON.parse(localStorage.getItem(CK)||'null')||{u:'',m:''}}catch(e){return{u:'',m:''}}};
-function lienEleves(c){const j=JSON.stringify({u:c.u,m:c.m||''});return MON_AS_URL+'?cotis='+btoa(unescape(encodeURIComponent(j))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
-function renderCotis(){const c=cotis();$('cUrl').value=c.u||'';$('cMont').value=c.m||'';const ok=cotisOk(c.u||'');
- $('cTest').hidden=!ok;$('cDiff').hidden=!ok;if(ok){$('cTest').href=c.u;$('cLien').value=lienEleves(c)}}
+function lienEleves(c){return MON_AS_URL+'?cfg='+A.cfgToParam(cfgLire(),c)}
+function renderCotis(){const c=cotis();$('cUrl').value=c.u||'';$('cMont').value=c.m||'';const ok=cotisOk(c.u||''),k=cfgLire(),util=ok||!!(k.etab||k.ville||k.acts||k.logo||k.saison);
+ $('cTest').hidden=!ok;$('cDiff').hidden=!util;if(ok)$('cTest').href=c.u;if(util)$('cLien').value=lienEleves(c)}
 $('cSave').onclick=()=>{const u=A.clean($('cUrl').value),m=A.clean($('cMont').value);
  if(u&&!cotisOk(u)){$('cMsg').textContent='Le lien doit commencer par https://';$('cMsg').className='hint err';return}
  try{localStorage.setItem(CK,JSON.stringify({u,m}))}catch(e){}
  $('cMsg').className='hint ok';$('cMsg').textContent=u?'Lien enregistré.':'Lien supprimé : le bouton de paiement ne sera plus proposé aux nouveaux élèves.';$('cQrBox').hidden=true;renderCotis()};
 $('cCopy').onclick=async()=>{try{await navigator.clipboard.writeText($('cLien').value);toast('Lien copié')}catch(e){$('cLien').select();toast('Sélectionnez puis copiez le lien')}};
 $('cQrBtn').onclick=()=>{const c=$('cQr');c.width=c.height=480;A.drawQR(c.getContext('2d'),A.makeQR($('cLien').value,'L'),0,0,480);$('cQrBox').hidden=false};
-$('cCfg').onclick=()=>{const c=cotis();dl(new Blob([JSON.stringify({cotisation:{url:c.u,montant:c.m||''}},null,2)],{type:'application/json'}),'config.json')};
+$('cCfg').onclick=()=>{const c=cotis();dl(new Blob([JSON.stringify({cotisation:{url:c.u,montant:c.m||''},as:cfgLire()},null,2)],{type:'application/json'}),'config.json')};
 
+/* ---------- Réglages de l'AS ---------- */
+function renderCfg(){const k=cfgLire();$('rEtab').value=k.etab||'';$('rVille').value=k.ville||'';$('rSaison').value=k.saison||'';
+ $('rLogo').innerHTML=Object.keys(A.LOGOS).map(x=>`<option value="${x}">${esc(LOGO_NOMS[x]||x)}</option>`).join('');$('rLogo').value=k.logo||'defaut';
+ $('rActs').value=(k.acts||A.ACT_DEFAUT).join('\n')}
+$('rSave').onclick=()=>{const acts=$('rActs').value.split(/\n/).map(A.clean).filter(Boolean),saison=A.clean($('rSaison').value);
+ if(saison&&!/^\d{4}-\d{4}$/.test(saison)){$('rMsg').textContent='Saison : format 2026-2027.';$('rMsg').className='hint err';return}
+ const same=acts.join('|')===A.ACT_DEFAUT.join('|');
+ const k=A.cfgClean({etab:$('rEtab').value,ville:$('rVille').value,saison,acts:same?[]:acts,logo:$('rLogo').value==='defaut'?'':$('rLogo').value});
+ try{localStorage.setItem(CFG,JSON.stringify(k))}catch(e){}cfgAppliquer();renderCfg();renderCotis();
+ $('rMsg').className='hint ok';$('rMsg').textContent='Réglages enregistrés. Donnez maintenant le lien Mon AS aux élèves (plus bas) : il les transmet.'};
+$('rDef').onclick=()=>{$('rActs').value=A.ACT_DEFAUT.join('\n')};
 /* ---------- Données ---------- */
 const dl=(blob,n)=>{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=n;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),3000)};
 $('xAS').onclick=async()=>{try{EPS.downloadXLSX(await EPS.exportXLSX({apps:[INS,GES,PRE],ids:L.filter(e=>inscrit(e)||PL(e).length).map(e=>e.id)}),'Gestion_AS_'+A.SAISON+'.xlsx')}catch(e){toast(e.message)}};
 $('xAll').onclick=async()=>{try{EPS.downloadXLSX(await EPS.exportXLSX(),'Mes_Apps_EPS_global.xlsx')}catch(e){toast(e.message)}};
 $('xOpuss').onclick=()=>{const rows=[['Nom','Prénom','Sexe','Date de naissance','Classe','N° licence','N° jeune officiel','Activités','Compétitions','Sport partagé']];
- L.filter(inscrit).forEach(e=>{const r=R(e)||{};rows.push([e.nom,A.tc(e.prenom),r.Sexe||'',A.frDate(r.Naissance||e.naissance),e.classe,licence(e),jo(e),r.Activites||'',r.Competitions_UNSS||'',r.Sport_partage||''])});
+ L.filter(inscrit).forEach(e=>{const r=R(e)||{};rows.push([e.nom,A.tc(e.prenom),r.Sexe||'',A.frDate(r.Naissance||e.naissance),e.classe,licence(e),jo(e),r.Activites||'',r.Competitions_UNSS||'',(r.Sport_partage==='Ne souhaite pas répondre'?'':r.Sport_partage)||''])});
  const csv='﻿'+rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(';')).join('\r\n');dl(new Blob([csv],{type:'text/csv;charset=utf-8'}),'Inscrits_AS_'+A.SAISON+'.csv')};
 $('iEleves').onclick=()=>$('fEleves').click();
 $('fEleves').onchange=async ev=>{const f=ev.target.files[0];ev.target.value='';if(!f)return;try{const r=await EPS.importFile(f);await load();toast('Import : '+(r.add||0)+' ajouté(s), '+(r.upd||0)+' mis à jour')}catch(e){alert(e.message)}};
@@ -197,7 +211,7 @@ $('clearAS').onclick=async()=>{if(!confirm('Effacer inscriptions, suivi et prés
 async function renderMeta(){try{const m=await EPS.meta();$('meta').textContent=m?'Dernier import : '+m.n+' ('+new Date(m.v).toLocaleString('fr-FR')+')':'Aucun import pour l’instant.'}catch(e){}}
 
 function render(){fillSel($('fcl'));renderKpis();renderList();renderQueue();renderCartes();renderAppel();renderMeta()}
-renderCotis();load();
+renderCfg();renderCotis();load();
 if('serviceWorker' in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('sw.js').catch(()=>{});
 window.__gas={load,recoit,traiteTexte,importeFichier,get L(){return L},get queue(){return queue},fiche};
 })();
