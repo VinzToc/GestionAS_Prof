@@ -82,6 +82,10 @@ dialog.big{max-width:560px}.kv{display:grid;grid-template-columns:auto 1fr;gap:3
 .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);z-index:120;padding:10px 18px;border-radius:12px;background:#101a36;border:1px solid var(--bd);font-weight:700;max-width:92%;text-align:center}
 @media(max-width:480px){.kpis{grid-template-columns:repeat(2,1fr)}}
 input[type=search]{-webkit-appearance:none;appearance:none}
-.cl .pls{margin-left:2px}
+.lst .act{display:flex;align-items:center;gap:8px;flex:none;margin-left:auto;flex-wrap:wrap;justify-content:flex-end}
+.lst .cl{min-width:140px}
+.btn.ed{padding:8px 12px;font-size:1.15rem;line-height:1;border-radius:12px}
 .lst li .btn{flex:none}
 .toast{bottom:112px}
+.pill.ok{background:#35d07f;color:#06210f}.pill.ko{background:#ff5252;color:#fff}
+.lst li{flex-wrap:wrap}.lst .cl{flex:1 1 150px}.lst .act{flex:0 1 auto;max-width:100%}.scrl{overflow-x:hidden}

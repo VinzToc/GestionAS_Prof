@@ -95,11 +95,9 @@ $('queue').onclick=async ev=>{const b=ev.target.closest('button');if(!b)return;
 /* ---------- Liste des élèves ---------- */
 const classes=()=>[...new Set(L.map(e=>e.classe).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'fr',{numeric:true}));
 function fillSel(sel,all){const v=sel.value,c=classes();sel.innerHTML='<option value="">Toutes les classes</option>'+c.map(x=>`<option>${esc(x)}</option>`).join('');if(c.includes(v))sel.value=v}
-function pills(e){const g=G(e),p=[];
- p.push(`<span class="pill ${g.Cotisation==='Oui'?'ok':'ko'}">${g.Cotisation==='Oui'?'cotisation ✓':'cotisation ✗'}</span>`);
- p.push(`<span class="pill ${licence(e)?'ok':'or'}">${licence(e)?'licence '+esc(licence(e)):'licence ?'}</span>`);
- p.push(`<span class="pill ${g.Dossier_papier==='Oui'?'ok':'or'}">${g.Dossier_papier==='Oui'?'fiche ✓':'fiche ?'}</span>`);
- const n=PL(e).length;if(n)p.push(`<span class="pill">${n} présence${n>1?'s':''}</span>`);return p.join('')}
+function pills(e){const g=G(e),p=(ok,t)=>`<span class="pill ${ok?'ok':'ko'}">${t}</span>`,out=[
+ p(g.Cotisation==='Oui','cotisation'),p(!!licence(e),'licence'),p(g.Dossier_papier==='Oui','fiche')];
+ const n=PL(e).length;if(n)out.push(`<span class="pill">${n} présence${n>1?'s':''}</span>`);return out.join('')}
 function renderList(){
  $('vide').hidden=!!L.length;
  const q=A.norm($('q').value),cl=$('fcl').value,st=$('fst').value;
@@ -107,7 +105,7 @@ function renderList(){
  if(q)l=l.filter(e=>A.norm(e.nom+e.prenom+e.classe).includes(q));
  else l=l.filter(e=>st==='all'?true:st==='ins'?inscrit(e):inscrit(e)&&(st==='coti'?G(e).Cotisation!=='Oui':st==='lic'?!licence(e):G(e).Dossier_papier!=='Oui'));
  $('cnt').textContent=l.length+' élève'+(l.length>1?'s':'')+(q?' (recherche dans toute la liste)':'');
- $('lst').innerHTML=l.slice(0,300).map(e=>`<li><div class="cl"><span class="nm">${esc(e.nom)} ${esc(A.tc(e.prenom))}</span> <span class="sb">· ${esc(e.classe)}</span> <span class="pls">${inscrit(e)?pills(e):'<span class="pill">non inscrit</span>'}</span></div><button class="btn b sm" data-id="${esc(e.id)}">Fiche</button></li>`).join('')}
+ $('lst').innerHTML=l.slice(0,300).map(e=>`<li><div class="cl"><span class="nm">${esc(e.nom)} ${esc(A.tc(e.prenom))}</span> <span class="sb">· ${esc(e.classe)}</span></div><div class="act"><span class="pls">${inscrit(e)?pills(e):'<span class="pill">non inscrit</span>'}</span><button class="btn b ed" data-id="${esc(e.id)}" title="Ouvrir la fiche" aria-label="Ouvrir la fiche">✏️</button></div></li>`).join('')}
 ['q','fcl','fst'].forEach(i=>$(i).addEventListener('input',renderList));
 $('lst').onclick=ev=>{const c=ev.target.closest('button[data-id]');if(c)fiche(c.dataset.id)};
 function renderKpis(){const I=L.filter(inscrit);
@@ -152,7 +150,7 @@ function renderAppel(){const s=seance();
  const pr=L.filter(e=>estPresent(e,s));$('aN').textContent='('+pr.length+')';
  $('aPres').innerHTML=pr.map(e=>`<li><span class="nm">${esc(nomc(e))} <span class="sb">· ${esc(e.classe)}</span></span><button class="btn r sm" data-no="${esc(e.id)}">Retirer</button></li>`).join('')||'<li class="hint">Personne pour l’instant.</li>';
  const q=A.norm($('aQ').value);
- $('aRes').innerHTML=q.length<2?'':L.filter(e=>A.norm(e.nom+e.prenom).includes(q)&&!estPresent(e,s)).slice(0,6).map(e=>`<li><span class="nm">${esc(nomc(e))} <span class="sb">· ${esc(e.classe)}</span> ${inscrit(e)?'':'<span class="pill or">non inscrit</span>'}</span><button class="btn sm" data-ok="${esc(e.id)}">Présent</button></li>`).join('');
+ $('aRes').innerHTML=q.length<2?'':L.filter(e=>A.norm(e.nom+e.prenom).includes(q)&&!estPresent(e,s)).slice(0,6).map(e=>`<li><span class="nm">${esc(nomc(e))} <span class="sb">· ${esc(e.classe)}</span> ${inscrit(e)?'':'<span class="pill ko">non inscrit</span>'}</span><button class="btn sm" data-ok="${esc(e.id)}">Présent</button></li>`).join('');
  renderStats()}
 $('aQ').oninput=renderAppel;
 $('aRes').onclick=async ev=>{const b=ev.target.closest('[data-ok]');if(b){await marque(L.find(e=>e.id===b.dataset.ok),true);$('aQ').value='';renderAppel()}};
