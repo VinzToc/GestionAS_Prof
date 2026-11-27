@@ -92,3 +92,5 @@ input[type=search]{-webkit-appearance:none;appearance:none}
 .toast{bottom:112px}
 .pill.ok{background:#35d07f;color:#06210f}.pill.ko{background:#ff5252;color:#fff}
 .lst li{flex-wrap:wrap}.lst .cl{flex:1 1 150px}.lst .act{flex:0 1 auto;max-width:100%}.scrl{overflow-x:hidden}
+
+.scanview .flash.warn{background:#ff5252;color:#fff;border-color:#fff;font-size:1.05rem;padding:12px 14px;box-shadow:0 0 0 3px #ff525266}

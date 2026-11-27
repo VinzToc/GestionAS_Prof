@@ -60,7 +60,8 @@ async function scanner(onCode,titre){
   if(v.videoWidth){const txt=await lire();
    if(scanOn&&txt&&(txt!==lastTxt||Date.now()-lastT>3000)){lastTxt=txt;lastT=Date.now();
     let msg='';try{msg=await onCode(txt)||''}catch(e){msg='❌ '+e.message}
-    if(msg){const f=$('flash');f.textContent=msg;f.hidden=false;clearTimeout(f._t);f._t=setTimeout(()=>f.hidden=true,2200)}}}
+    const warn=msg&&typeof msg==='object'&&msg.warn;if(warn)msg=msg.t;
+    if(msg){const f=$('flash');f.textContent=msg;f.classList.toggle('warn',!!warn);f.hidden=false;if(warn){try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}}clearTimeout(f._t);f._t=setTimeout(()=>f.hidden=true,warn?5000:2200)}}}
   if(scanOn)setTimeout(tick,detector?80:140)};tick()}
 function fermeScan(){if(!scanOn&&!stream)return;scanOn=false;if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}$('vid').srcObject=null;$('scan').classList.remove('on')}
 $('scanX').onclick=fermeScan;document.addEventListener('visibilitychange',()=>{if(document.hidden)fermeScan()});window.addEventListener('pagehide',fermeScan);
@@ -158,12 +159,15 @@ function renderAppel(){const s=seance();
 $('aQ').oninput=renderAppel;
 $('aRes').onclick=async ev=>{const b=ev.target.closest('[data-ok]');if(b){await marque(L.find(e=>e.id===b.dataset.ok),true);$('aQ').value='';renderAppel()}};
 $('aPres').onclick=async ev=>{const b=ev.target.closest('[data-no]');if(b)await marque(L.find(e=>e.id===b.dataset.no),false)};
+function piecesManquantes(e){const g=G(e),m=[];if(g.Cotisation!=='Oui')m.push('cotisation non payée');if(g.Dossier_papier!=='Oui')m.push('fiche non remise');if(!licence(e))m.push('licence UNSS non saisie');return m}
 function trouveCarte(t){const c=A.parseCardPayload(t);if(!c)return null;
  const e=L.find(x=>A.cardId(x)===c.id);if(e)return e;
  const m=A.matchEleve(L,c);return m.statut==='certain'?m.eleve:null}
 $('aScan').onclick=()=>{if(!A.clean($('aAct').value)&&!confirm('Aucune activité saisie : l’appel sera enregistré sans activité. Continuer ?'))return;
  scanner(async t=>{const e=trouveCarte(t);if(!e){if(A.typeCode(t)==='inscription')return'Ceci est un QR d’inscription';return'❌ Carte non reconnue'}
-  if(estPresent(e,seance()))return'Déjà présent(e) : '+nomc(e);await marque(e,true);return'✅ '+nomc(e)+(inscrit(e)?'':' (non inscrit)')},'Flashez les cartes d’AS')};
+  if(estPresent(e,seance()))return'Déjà présent(e) : '+nomc(e);await marque(e,true);
+  const mq=piecesManquantes(e),ok='✅ '+nomc(e)+(inscrit(e)?'':' (non inscrit)');
+  return mq.length?{warn:true,t:'⚠ '+nomc(e)+' (présent·e) — dossier incomplet : '+mq.join(' · ')}:ok},'Flashez les cartes d’AS')};
 function renderStats(){
  const I=L.filter(e=>PL(e).length||inscrit(e)),seances=new Map();
  L.forEach(e=>PL(e).forEach(l=>{const k=l.Date+'|'+(l.Activite||'');if(!seances.has(k))seances.set(k,{d:l.Date,a:l.Activite||'',n:0});seances.get(k).n++}));
@@ -219,5 +223,5 @@ async function renderMeta(){try{const m=await EPS.meta();$('meta').textContent=m
 function render(){fillSel($('fcl'));renderKpis();renderList();renderQueue();renderCartes();renderAppel();renderMeta()}
 renderCfg();renderCotis();load();
 if('serviceWorker' in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('sw.js').catch(()=>{});
-window.__gas={load,recoit,traiteTexte,importeFichier,get L(){return L},get queue(){return queue},fiche};
+window.__gas={load,recoit,traiteTexte,importeFichier,get L(){return L},get queue(){return queue},fiche,piecesManquantes};
 })();
